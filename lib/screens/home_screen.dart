@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_own_flashcard_v0/parts/button_with_icon.dart';
 // import 'dart:html';
 
 
@@ -11,6 +12,10 @@ class HomeScreen extends StatefulWidget {
 
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isIncludedMemorizedWords = false;  // 暗記した単語を含めるかのbool用
+
+
+  // +++++++++++++++++++++++++++++++++++++++++++++
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,13 +31,32 @@ class _HomeScreenState extends State<HomeScreen> {
               indent: 35.0,  // 線の左右
               endIndent: 35.0,
             ),
-            // TODO: テストボタン
-            // TODO: ラジオボタン
-            // TODO: 単語一覧ボタン
+            // ----- テストボタン -----
+            // 各々引数へ渡してあげるために設定
+            ButtonWithIcon(
+              onPressed: () => print("テスト"),  // TODO:テスト
+              icon: Icon(Icons.play_arrow),
+              label: "Test",
+              color: Colors.orange,
+            ),
+            SizedBox(height: 10.0), // デザインゆえボックススペース挿入
+            // ----- ラジオボタン -----
+            _radioButtons(),
+            SizedBox(height: 30.0), // デザインゆえボックススペース挿入
+            // ----- 単語一覧ボタン -----
+            ButtonWithIcon(
+              onPressed: () => print("単語一覧"),  // TODO:一覧
+              icon: Icon(Icons.list),
+              label: "単語一覧をみる",
+              color: Colors.grey,
+            ),
+            SizedBox(height: 50.0), // デザインゆえボックススペース挿入
+            // ----- 著作権 -----
             Text(
               "Copyright (C) 2020 R inc. All Rights Reserved.",
               style: TextStyle(fontFamily: "Mont"),  // 特定のテキストだけfont変更
             ),
+            SizedBox(height: 25.0), // デザインゆえボックススペース挿入
           ],
         ),
       ),
@@ -55,8 +79,35 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _radioButtons() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 70.0),
+      child: Column(
+        children: <Widget>[
+          RadioListTile(
+            value: false, // 今回覚えた単語を含む事をyesにしているので、ここfalse(coz official)
+            groupValue: isIncludedMemorizedWords, // 2択はbool -> propertyを上で定義
+            onChanged: (value) => _onRadioSelected(value),  // f12(RadioListTile) -> f12(onChanged) -> If true/false, [onChanged] can be called with [value] ->valueが引数に必要と判断
+            title: Text("覚えた単語を除く", style: TextStyle(fontSize: 16.0),),
+          ),
+          RadioListTile(
+            value: true, // 上ラジオを背反
+            groupValue: isIncludedMemorizedWords, // 上ラジオと同様
+            onChanged: (value) => _onRadioSelected(value),
+            title: Text("覚えた単語も含む", style: TextStyle(fontSize: 16.0),),
+          ),
+        ],
+      ),
+    );
+  }
 
-
+  // Widget _onRadioSelected() { // ラジオボタン押下、押されるものが変わるを表す
+  Widget _onRadioSelected(value) {  // value引数受ける
+    setState(() {
+      isIncludedMemorizedWords = value; // groupValueの値を変えたげる
+      print("ラジオで$valueを選択");
+    });
+  }
 
 
 
