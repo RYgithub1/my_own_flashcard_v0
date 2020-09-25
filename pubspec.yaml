@@ -14,14 +14,20 @@ dependencies:
   sqlite3_flutter_libs: ^0.2.0
   path_provider:
   path:
-
+  toast: ^0.1.5
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  moor_generator: ^3.3.1
   build_runner:
+  moor_generator: ^3.3.1
+  # analyzer: ^0.40.2
+
+# for "Bad state: Unexpected diagnostics"
+# dependency_overrides:
+#   analyzer: '0.39.14'
+  # analyzer: ^0.40.2
 
 
 flutter:

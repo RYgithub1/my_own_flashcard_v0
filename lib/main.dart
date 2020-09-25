@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:my_own_flashcard_v0/db/database.dart';
 import 'package:my_own_flashcard_v0/screens/home_screen.dart';
 
 
 
-void main() => runApp(MyApp());
+// moor
+MyDatabase database;
+
+// void main() => runApp(MyApp());
+void main(){
+  database = MyDatabase();  // for moor
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
