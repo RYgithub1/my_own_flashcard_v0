@@ -219,6 +219,7 @@ class _EditScreenState extends State<EditScreen> {
     var word = Word(      // var for inside of method.. DB定型のcreateを利用
       strQuestion: questionController.text,
       strAnswer: answerController.text,
+      isMemorized: false,  //
     );
     try{
       await database.updateWord(word);

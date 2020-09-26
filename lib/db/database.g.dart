@@ -10,16 +10,23 @@ part of 'database.dart';
 class Word extends DataClass implements Insertable<Word> {
   final String strQuestion;
   final String strAnswer;
-  Word({@required this.strQuestion, @required this.strAnswer});
+  final bool isMemorized;
+  Word(
+      {@required this.strQuestion,
+      @required this.strAnswer,
+      @required this.isMemorized});
   factory Word.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final boolType = db.typeSystem.forDartType<bool>();
     return Word(
       strQuestion: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}str_question']),
       strAnswer: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}str_answer']),
+      isMemorized: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_memorized']),
     );
   }
   @override
@@ -30,6 +37,9 @@ class Word extends DataClass implements Insertable<Word> {
     }
     if (!nullToAbsent || strAnswer != null) {
       map['str_answer'] = Variable<String>(strAnswer);
+    }
+    if (!nullToAbsent || isMemorized != null) {
+      map['is_memorized'] = Variable<bool>(isMemorized);
     }
     return map;
   }
@@ -42,6 +52,9 @@ class Word extends DataClass implements Insertable<Word> {
       strAnswer: strAnswer == null && nullToAbsent
           ? const Value.absent()
           : Value(strAnswer),
+      isMemorized: isMemorized == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isMemorized),
     );
   }
 
@@ -51,6 +64,7 @@ class Word extends DataClass implements Insertable<Word> {
     return Word(
       strQuestion: serializer.fromJson<String>(json['strQuestion']),
       strAnswer: serializer.fromJson<String>(json['strAnswer']),
+      isMemorized: serializer.fromJson<bool>(json['isMemorized']),
     );
   }
   @override
@@ -59,59 +73,73 @@ class Word extends DataClass implements Insertable<Word> {
     return <String, dynamic>{
       'strQuestion': serializer.toJson<String>(strQuestion),
       'strAnswer': serializer.toJson<String>(strAnswer),
+      'isMemorized': serializer.toJson<bool>(isMemorized),
     };
   }
 
-  Word copyWith({String strQuestion, String strAnswer}) => Word(
+  Word copyWith({String strQuestion, String strAnswer, bool isMemorized}) =>
+      Word(
         strQuestion: strQuestion ?? this.strQuestion,
         strAnswer: strAnswer ?? this.strAnswer,
+        isMemorized: isMemorized ?? this.isMemorized,
       );
   @override
   String toString() {
     return (StringBuffer('Word(')
           ..write('strQuestion: $strQuestion, ')
-          ..write('strAnswer: $strAnswer')
+          ..write('strAnswer: $strAnswer, ')
+          ..write('isMemorized: $isMemorized')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(strQuestion.hashCode, strAnswer.hashCode));
+  int get hashCode => $mrjf($mrjc(
+      strQuestion.hashCode, $mrjc(strAnswer.hashCode, isMemorized.hashCode)));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
       (other is Word &&
           other.strQuestion == this.strQuestion &&
-          other.strAnswer == this.strAnswer);
+          other.strAnswer == this.strAnswer &&
+          other.isMemorized == this.isMemorized);
 }
 
 class WordsCompanion extends UpdateCompanion<Word> {
   final Value<String> strQuestion;
   final Value<String> strAnswer;
+  final Value<bool> isMemorized;
   const WordsCompanion({
     this.strQuestion = const Value.absent(),
     this.strAnswer = const Value.absent(),
+    this.isMemorized = const Value.absent(),
   });
   WordsCompanion.insert({
     @required String strQuestion,
     @required String strAnswer,
+    this.isMemorized = const Value.absent(),
   })  : strQuestion = Value(strQuestion),
         strAnswer = Value(strAnswer);
   static Insertable<Word> custom({
     Expression<String> strQuestion,
     Expression<String> strAnswer,
+    Expression<bool> isMemorized,
   }) {
     return RawValuesInsertable({
       if (strQuestion != null) 'str_question': strQuestion,
       if (strAnswer != null) 'str_answer': strAnswer,
+      if (isMemorized != null) 'is_memorized': isMemorized,
     });
   }
 
   WordsCompanion copyWith(
-      {Value<String> strQuestion, Value<String> strAnswer}) {
+      {Value<String> strQuestion,
+      Value<String> strAnswer,
+      Value<bool> isMemorized}) {
     return WordsCompanion(
       strQuestion: strQuestion ?? this.strQuestion,
       strAnswer: strAnswer ?? this.strAnswer,
+      isMemorized: isMemorized ?? this.isMemorized,
     );
   }
 
@@ -124,6 +152,9 @@ class WordsCompanion extends UpdateCompanion<Word> {
     if (strAnswer.present) {
       map['str_answer'] = Variable<String>(strAnswer.value);
     }
+    if (isMemorized.present) {
+      map['is_memorized'] = Variable<bool>(isMemorized.value);
+    }
     return map;
   }
 
@@ -131,7 +162,8 @@ class WordsCompanion extends UpdateCompanion<Word> {
   String toString() {
     return (StringBuffer('WordsCompanion(')
           ..write('strQuestion: $strQuestion, ')
-          ..write('strAnswer: $strAnswer')
+          ..write('strAnswer: $strAnswer, ')
+          ..write('isMemorized: $isMemorized')
           ..write(')'))
         .toString();
   }
@@ -167,8 +199,19 @@ class $WordsTable extends Words with TableInfo<$WordsTable, Word> {
     );
   }
 
+  final VerificationMeta _isMemorizedMeta =
+      const VerificationMeta('isMemorized');
+  GeneratedBoolColumn _isMemorized;
   @override
-  List<GeneratedColumn> get $columns => [strQuestion, strAnswer];
+  GeneratedBoolColumn get isMemorized =>
+      _isMemorized ??= _constructIsMemorized();
+  GeneratedBoolColumn _constructIsMemorized() {
+    return GeneratedBoolColumn('is_memorized', $tableName, false,
+        defaultValue: Constant(false));
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [strQuestion, strAnswer, isMemorized];
   @override
   $WordsTable get asDslTable => this;
   @override
@@ -193,6 +236,12 @@ class $WordsTable extends Words with TableInfo<$WordsTable, Word> {
           strAnswer.isAcceptableOrUnknown(data['str_answer'], _strAnswerMeta));
     } else if (isInserting) {
       context.missing(_strAnswerMeta);
+    }
+    if (data.containsKey('is_memorized')) {
+      context.handle(
+          _isMemorizedMeta,
+          isMemorized.isAcceptableOrUnknown(
+              data['is_memorized'], _isMemorizedMeta));
     }
     return context;
   }
