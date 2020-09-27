@@ -17,8 +17,8 @@ class Words extends Table{
   TextColumn get strQuestion => text()();   // TextColumnもmoorのクラス。f12->text()()もmoorのルール
   TextColumn get strAnswer => text()();
 
+  // (DB構造変更->統合処理)withDefaultデフォルト値を入れる仕組み
   BoolColumn get isMemorized => boolean().withDefault(Constant(false))();  // defaltはfalse、暗記済みじゃないと設定...最後の()!!!
-  // withDefaultデフォルト値を入れる仕組み
 
   @override
   // implement primaryKey
@@ -51,8 +51,10 @@ class MyDatabase extends _$MyDatabase{
   @override
   // int get schemaVersion => throw UnimplementedError();  // エラーまず赤文字追う ->挙動ギャップ追う
   int get schemaVersion => 2;  // DBのスキーマバージョン設定。。。。一旦gDart消してwatchで、変数定義がgDartに追加される
+
+  // 統合処理
   MigrationStrategy get migration => MigrationStrategy(  // この()はムーアの書き方統合処理
-    onCreate: (Migrator m){
+    onCreate: (Migrator m) {
       // return m.createAllTables();
       return m.createAll();
     },
@@ -63,6 +65,8 @@ class MyDatabase extends _$MyDatabase{
     }
   );
 
+
+
   // <<クエリメソッドの作成>>
   // database -> Future )) moor refarence -> DB４つの作成 -> いつもDartでこう書く定形-> CRUD rule、クエリ作成
   // < create >    ...  DBからloadして、ｐropertyにしてget
@@ -70,8 +74,10 @@ class MyDatabase extends _$MyDatabase{
   // < read >
   Future<List<Word>> get allWords => select(words).get();  // using getter to read。ここでは全てのデータを取得するためのmoor
   // （< read > 暗記済み単語の除外）以下追加、全てのデータでなく、特定データの取得read用->確認テストで個別抽出に必要
-  Future<List<Word>> get allWordsExcludedMemorized => (select(words)..where((table) => table.isMemorized.equals(false))).get();
-  
+  Future<List<Word>> get allWordsExcludedMemorized =>
+    (select(words)
+      ..where((table) => table.isMemorized.equals(false))).get();
+
   // < update >
   Future updateWord(Word word) => update(words).replace(word);  // write or replace
   // < delete >

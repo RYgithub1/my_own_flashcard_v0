@@ -31,9 +31,7 @@ class EditScreen extends StatefulWidget {
 class _EditScreenState extends State<EditScreen> {
   TextEditingController questionController = TextEditingController();
   TextEditingController answerController = TextEditingController();
-
   String _titleText = "";
-
   bool _isQuestionEnabled;  // enabledの型bool
 
 
@@ -155,6 +153,16 @@ class _EditScreenState extends State<EditScreen> {
   }
 
 
+
+  _onWordRegistered() {
+    if (widget.status == EditStatus.ADD) {
+      _insertWord();
+    } else {
+      _updateWord();
+    }
+  }
+
+  // 《登録時》
   _insertWord() async{
     if (questionController.text == "" || answerController.text == ""){  // QA両方登録していないと進めませんif
       // QA登録toastメッセージ
@@ -170,6 +178,7 @@ class _EditScreenState extends State<EditScreen> {
     var word = Word(      // var for inside of method.. DB定型のcreateを利用
       strQuestion: questionController.text,
       strAnswer: answerController.text,
+      isMemorized: null,  // message-> Word(編集更新時の処理)に下線-> required argument isMemorized
     );
 
     // 同じ単語登録不可の例外メッセージ
@@ -192,20 +201,16 @@ class _EditScreenState extends State<EditScreen> {
         duration: Toast.LENGTH_LONG,
         gravity: Toast.CENTER,
       );
-    }
-  }
-
-
-  _onWordRegistered() {
-    if (widget.status == EditStatus.ADD) {
-      _insertWord();
-    } else {
-      _updateWord();
+    } finally {
+      Navigator.pop(context);
     }
   }
 
 
 
+
+
+  // 《更新時》
   void _updateWord() async{
     if (questionController.text == "" || answerController.text == ""){
       Toast.show(
@@ -219,7 +224,7 @@ class _EditScreenState extends State<EditScreen> {
     var word = Word(      // var for inside of method.. DB定型のcreateを利用
       strQuestion: questionController.text,
       strAnswer: answerController.text,
-      isMemorized: false,  //
+      isMemorized: false,  // 登録時はfalse設定していたが、DBテーブルのword更新時はfalseでなくエラーだったので追記
     );
     try{
       await database.updateWord(word);
